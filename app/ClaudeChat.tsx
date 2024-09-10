@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { streamMessage } from "./actions";
+import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 const ClaudeChat: React.FC = () => {
   const [input, setInput] = useState("");
@@ -35,9 +38,41 @@ const ClaudeChat: React.FC = () => {
     <div className="flex flex-col h-[80vh]">
       <div className="flex-grow overflow-auto p-4">
         {chatHistory.map((message, index) => (
-          <p key={index} className="mb-2">
-            {message}
-          </p>
+          <div key={index} className="mb-2">
+            {message.startsWith("You: ") ? (
+              <>
+                <h3 className="font-bold text-lg">You:</h3>
+                <p>{message.replace("You: ", "")}</p>
+              </>
+            ) : (
+              <>
+                <h3 className="font-bold text-lg">Claude:</h3>
+                <ReactMarkdown
+                  components={{
+                    code({ node, inline, className, children, ...props }) {
+                      const match = /language-(\w+)/.exec(className || "");
+                      return !inline && match ? (
+                        <SyntaxHighlighter
+                          style={vscDarkPlus}
+                          language={match[1]}
+                          PreTag="div"
+                          {...props}
+                        >
+                          {String(children).replace(/\n$/, "")}
+                        </SyntaxHighlighter>
+                      ) : (
+                        <code className={className} {...props}>
+                          {children}
+                        </code>
+                      );
+                    },
+                  }}
+                >
+                  {message.replace("Claude: ", "")}
+                </ReactMarkdown>
+              </>
+            )}
+          </div>
         ))}
       </div>
       <form onSubmit={handleSubmit} className="p-4">

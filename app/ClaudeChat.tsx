@@ -13,13 +13,13 @@ const ClaudeChat: React.FC = () => {
     if (!input.trim()) return;
 
     setIsLoading(true);
-    setChatHistory((prev) => [...prev, `You: ${input}`]);
+    const userMessage = `You: ${input}`;
+    setChatHistory((prev) => [...prev, userMessage]);
     setInput("");
 
     try {
       const response = await streamMessage(input);
-
-      setChatHistory((prev) => [...prev.slice(0, -1), `Claude: ${response}`]);
+      setChatHistory((prev) => [...prev, `Claude: ${response}`]);
     } catch (error: unknown) {
       console.error("Error:", error);
       setChatHistory((prev) => [
